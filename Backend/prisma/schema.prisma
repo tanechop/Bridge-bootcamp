@@ -1,0 +1,103 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               Int               @id @default(autoincrement())
+  email            String            @unique
+  name             String
+  password         String
+  phone            String?
+  status           String            @default("Active")
+  createdAt        DateTime          @default(now())
+  role             String
+  applications     Application[]
+  payments         Payment[]
+  recruiterProfile RecruiterProfile?
+  seekerProfile    SeekerProfile?
+  postedJobs       Job[]             @relation("JobPostedBy")
+}
+
+model SeekerProfile {
+  id                Int      @id @default(autoincrement())
+  userId            Int      @unique
+  title             String?
+  city              String?
+  yearsExp          String?
+  skills            String[]
+  cvUploaded        Boolean  @default(false)
+  profileCompletion Int      @default(0)
+  avatar            String?
+  memberSince       DateTime @default(now())
+  education         Json?
+  preferences       Json?
+  user              User     @relation(fields: [userId], references: [id])
+}
+
+model RecruiterProfile {
+  id           Int      @id @default(autoincrement())
+  userId       Int      @unique
+  company      String
+  industry     String?
+  companySize  String?
+  website      String?
+  hqLocation   String?
+  logoUploaded Boolean  @default(false)
+  memberSince  DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id])
+}
+
+model Job {
+  id                 Int           @id @default(autoincrement())
+  title              String
+  company            String
+  location           String
+  type               String
+  sector             String
+  salary             String?
+  description        String
+  requirements       String[]
+  responsibilities   String[]
+  skills             String[]
+  minEducation       String?
+  minExperience      String?
+  posted             DateTime      @default(now())
+  deadline           DateTime?
+  companyId          Int?
+  postedByUserId     Int?
+  postedBy           User?         @relation("JobPostedBy", fields: [postedByUserId], references: [id])
+  moderationStatus   String        @default("Active")
+  applications       Application[]
+}
+
+model Application {
+  id                  Int      @id @default(autoincrement())
+  jobId               Int
+  appliedOn           DateTime @default(now())
+  cvStatus            String   @default("Pending")
+  paymentStatus       String   @default("Pending")
+  recruiterInterest   String   @default("None")
+  contactAccessStatus String   @default("None")
+  userId              Int
+  job                 Job      @relation(fields: [jobId], references: [id])
+  user                User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, jobId])
+}
+
+model Payment {
+  id          Int      @id @default(autoincrement())
+  method      String
+  amount      String
+  reference   String   @unique
+  status      String   @default("Pending")
+  submittedAt DateTime @default(now())
+  jobId       Int?
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+}
