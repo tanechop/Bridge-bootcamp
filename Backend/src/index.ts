@@ -210,7 +210,7 @@ function calculateProfileCompletion(profile: any) {
 
 // --- PROFILE ROUTES ---
 
-app.post('/api/profiles/seeker', authenticateToken, async (req: any, res) => {
+app.post('/api/profiles/seeker', async (req: any, res) => {
   try {
     const data = pickSeekerProfileBody(req.body);
 
@@ -228,7 +228,7 @@ app.post('/api/profiles/seeker', authenticateToken, async (req: any, res) => {
   }
 });
 
-app.post('/api/profiles/recruiter', authenticateToken, async (req: any, res) => {
+app.post('/api/profiles/recruiter',async (req: any, res) => {
   try {
     const data = pickRecruiterProfileBody(req.body);
     const profile = await prisma.recruiterProfile.upsert({
