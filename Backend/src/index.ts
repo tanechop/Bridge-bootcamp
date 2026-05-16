@@ -47,7 +47,7 @@ function stripPassword<T extends { password?: string }>(user: T | null): Omit<T,
 
 app.use(
   cors({
-    origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002'],
+    origin: [process.env.FRONTEND_URL || 'http://localhost:3000'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
@@ -193,17 +193,17 @@ function calculateProfileCompletion(profile: any) {
   if (profile.city && profile.city.trim()) score += 10;
   if (profile.yearsExp && profile.yearsExp.trim()) score += 10;
   if (profile.skills && Array.isArray(profile.skills) && profile.skills.length > 0) score += 20;
-  
+
   if (profile.education && typeof profile.education === 'object') {
     const hasValues = Object.values(profile.education).some(v => v !== null && v !== undefined && v !== '');
     if (hasValues) score += 20;
   }
-  
+
   if (profile.preferences && typeof profile.preferences === 'object') {
     const hasValues = Object.values(profile.preferences).some(v => v !== null && v !== undefined && v !== '');
     if (hasValues) score += 10;
   }
-  
+
   if (profile.cvUploaded) score += 20;
   return score;
 }
@@ -213,7 +213,7 @@ function calculateProfileCompletion(profile: any) {
 app.post('/api/profiles/seeker', authenticateToken, async (req: any, res) => {
   try {
     const data = pickSeekerProfileBody(req.body);
-    
+
     // Auto-calculate completion if not explicitly provided or to override it
     data.profileCompletion = calculateProfileCompletion(data);
 
